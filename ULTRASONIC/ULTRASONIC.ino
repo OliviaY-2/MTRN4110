@@ -25,6 +25,12 @@ void loop() {
   
   Serial.print(cm);
   Serial.println(" cm");
+
+  if (cm > 7) {
+    Serial.println("no wall");
+  } else {
+    Serial.println("wall");
+  }
   
-  delay(250);
+  delay(500);
 }
