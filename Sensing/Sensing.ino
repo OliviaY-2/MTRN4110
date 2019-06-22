@@ -162,9 +162,13 @@ void function1 () {
   Serial.println("mm");
 }
 
+
+
 void function2 () {
   Serial.println("Entered 2");
 }
+
+
 
 void function3 () {
   Serial.println("Entered 3");
@@ -199,6 +203,8 @@ void function3 () {
   }
   
 }
+
+
 
 void function4 () {
   Serial.println("Entered 4");
