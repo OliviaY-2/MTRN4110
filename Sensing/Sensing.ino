@@ -39,25 +39,25 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(INTERRUPT, INPUT);
-  Wire.begin();
-  laser2.setAddress(0x32);
-
-  Serial.println("Initialising IMU");
-  IMU.initialize(); //set up IMU
-  Serial.println("initialising DMP");
-  devStatus = IMU.dmpInitialize();
-
-  if (devStatus == 0) {
-    Serial.println("DMP initialisation successful");
-    IMU.setDMPEnabled(true);
-    attachInterrupt(digitalPinToInterrupt(INTERRUPT), dmpDataReady, RISING);  //set up interrupt
-    mpuIntStatus = IMU.getIntStatus();
-    dmpReady = true;
-    packetSize = IMU.dmpGetFIFOPacketSize();
-  } else {
-    Serial.println("DMP initialisation failed");
-  }
-  
+//  Wire.begin();
+//  laser2.setAddress(0x32);
+//
+//  Serial.println("Initialising IMU");
+//  IMU.initialize(); //set up IMU
+//  Serial.println("initialising DMP");
+//  devStatus = IMU.dmpInitialize();
+//
+//  if (devStatus == 0) {
+//    Serial.println("DMP initialisation successful");
+//    IMU.setDMPEnabled(true);
+//    attachInterrupt(digitalPinToInterrupt(INTERRUPT), dmpDataReady, RISING);  //set up interrupt
+//    mpuIntStatus = IMU.getIntStatus();
+//    dmpReady = true;
+//    packetSize = IMU.dmpGetFIFOPacketSize();
+//  } else {
+//    Serial.println("DMP initialisation failed");
+//  }
+//  
   Serial.println("Please enter a number 1 - 4");
   
 }
@@ -137,6 +137,22 @@ void function1 () {
 
 void function2 () {
   Serial.println("Entered 2");
+
+  double distance = ultrasonicRange();
+  Serial.println(distance);
+  while (distance > 7){ //While there is no obstruction, keep measuring the distance
+    distance = ultrasonicRange();
+    delay(100);
+    Serial.println("no");
+  } //break from loop when a distance less than 7 cm is detected
+
+  while (distance < 7) { //while there is an obstruction, wait until it is gone
+    distance = ultrasonicRange();
+    Serial.println("yes");
+    delay(100);
+  } //break from loop when the obstruction is removed
+  Serial.println("Message!");
+  Serial.println(distance);
 }
 
 
