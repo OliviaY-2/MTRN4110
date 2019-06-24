@@ -101,52 +101,22 @@ void function1 () {
   Serial.println("Entered 1");
 
   //IMU
-  while (!mpuInterrupt && fifoCount < packetSize) {
-    if (mpuInterrupt && fifoCount < packetSize) {
-      fifoCount = IMU.getFIFOCount();
-    }      
-  }
-  mpuInterrupt = false; //reset interrupt flag and get INT_STATUS byte
-  mpuIntStatus = IMU.getIntStatus();
-  fifoCount = IMU.getFIFOCount();
-  
-  if (mpuIntStatus & _BV(MPU6050_INTERRUPT_DMP_INT_BIT)) {
-    while (fifoCount < packetSize) fifoCount = IMU.getFIFOCount(); // wait for correct available data length, should be a VERY short wait
-
-    IMU.getFIFOBytes(fifoBuffer, packetSize); // read a packet from FIFO
-        
-    // track FIFO count here in case there is > 1 packet available
-    // (this lets us immediately read more without waiting for an interrupt)
-    fifoCount -= packetSize;
-
-    IMU.dmpGetQuaternion(&q, fifoBuffer);
-    IMU.dmpGetGravity(&gravity, &q);
-    IMU.dmpGetYawPitchRoll(ypr, &q, &gravity);
-    IMU.dmpGetAccel(&aa, fifoBuffer);
-    IMU.dmpGetLinearAccel(&aaReal, &aa, &gravity);
-    Serial.print("Roll: ");
-    Serial.println(ypr[2] * 180/M_PI);
-    Serial.print("Pitch: ");
-    Serial.println(ypr[1] * 180/M_PI);
-    Serial.print("Yaw: ");
-    Serial.println(ypr[2] * 180/M_PI);
-    Serial.print("X acceleration: ");
-    Serial.println(aaReal.x);
-    Serial.print("Y acceleration: ");
-    Serial.println(aaReal.y);
-    Serial.print("Z acceleration: ");
-    Serial.println(aaReal.z);
-  }
+  IMUmeasurement();
+  Serial.print("Roll: ");
+  Serial.println(ypr[2] * 180/M_PI);
+  Serial.print("Pitch: ");
+  Serial.println(ypr[1] * 180/M_PI);
+  Serial.print("Yaw: ");
+  Serial.println(ypr[2] * 180/M_PI);
+  Serial.print("X acceleration: ");
+  Serial.println(aaReal.x);
+  Serial.print("Y acceleration: ");
+  Serial.println(aaReal.y);
+  Serial.print("Z acceleration: ");
+  Serial.println(aaReal.z);
 
   //ultrasonic sensor
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(5);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  pinMode(echoPin, INPUT);
-  long duration = pulseIn(echoPin, HIGH);
-  double cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+  double cm = ultrasonicRange();
   Serial.print("Distance (ultrasonic): ");
   Serial.print(cm);
   Serial.println(" cm");
@@ -173,15 +143,8 @@ void function2 () {
 
 void function3 () {
   Serial.println("Entered 3");
-  
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(5);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  pinMode(echoPin, INPUT);
-  long duration = pulseIn(echoPin, HIGH);
-  double frontDistance = (duration/2) / 291;
+
+  double frontDistance = ultrasonicRange();
   uint8_t leftDistance = laser1.readRangeSingle()/10;
   uint8_t rightDistance = laser2.readRangeSingle()/10;
 
@@ -209,4 +172,45 @@ void function3 () {
 
 void function4 () {
   Serial.println("Entered 4");
+}
+
+
+double ultrasonicRange() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(5);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  pinMode(echoPin, INPUT);
+  long duration = pulseIn(echoPin, HIGH);
+  double cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+  return cm;
+}
+
+
+void IMUmeasurement() {
+  while (!mpuInterrupt && fifoCount < packetSize) {
+    if (mpuInterrupt && fifoCount < packetSize) {
+      fifoCount = IMU.getFIFOCount();
+    }      
+  }
+  mpuInterrupt = false; //reset interrupt flag and get INT_STATUS byte
+  mpuIntStatus = IMU.getIntStatus();
+  fifoCount = IMU.getFIFOCount();
+  
+  if (mpuIntStatus & _BV(MPU6050_INTERRUPT_DMP_INT_BIT)) {
+    while (fifoCount < packetSize) fifoCount = IMU.getFIFOCount(); // wait for correct available data length, should be a VERY short wait
+
+    IMU.getFIFOBytes(fifoBuffer, packetSize); // read a packet from FIFO
+        
+    // track FIFO count here in case there is > 1 packet available
+    // (this lets us immediately read more without waiting for an interrupt)
+    fifoCount -= packetSize;
+
+    IMU.dmpGetQuaternion(&q, fifoBuffer);
+    IMU.dmpGetGravity(&gravity, &q);
+    IMU.dmpGetYawPitchRoll(ypr, &q, &gravity);
+    IMU.dmpGetAccel(&aa, fifoBuffer);
+    IMU.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+  }
 }
