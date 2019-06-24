@@ -107,7 +107,7 @@ void function1 () {
   Serial.print("Pitch: ");
   Serial.println(ypr[1] * 180/M_PI);
   Serial.print("Yaw: ");
-  Serial.println(ypr[2] * 180/M_PI);
+  Serial.println(ypr[0] * 180/M_PI);
   Serial.print("X acceleration: ");
   Serial.println(aaReal.x);
   Serial.print("Y acceleration: ");
@@ -188,6 +188,48 @@ void function3 () {
 
 void function4 () {
   Serial.println("Entered 4");
+  Serial.println("N E S W");
+
+  IMUmeasurement();
+  float initYaw = ypr[0] * 180/M_PI; //initial yaw in degrees
+  uint8_t westDistance = laser1.readRangeSingle()/10;
+  double northDistance = ultrasonicRange();
+  uint8_t eastDistance = laser2.readRangeSingle()/10;
+  double southDistance;
+
+  delayMicroseconds(3*10^6); //delay 3 seconds for turning purposes
+  IMUmeasurement();
+  float finYaw = ypr[0] * 180/M_PI; //final yaw in degrees
+  float rotation = finYaw - initYaw;
+
+  if (rotation >= 80 && rotation <= 100) { //rotated approx 90 deg
+    southDistance = (double) laser2.readRangeSingle()/10;
+  } else if (rotation >= 170 && rotation <= 190) { //rotated approx 180 deg
+    southDistance = ultrasonicRange();
+  } else if (rotation >= 260 && rotation <= 280) { //rotated approx 270 deg
+    southDistance = (double) laser1.readRangeSingle()/10;
+  }
+
+  if (northDistance > 7) {
+    Serial.print("0 ");
+  } else {
+    Serial.print("1 ");
+  }
+  if (eastDistance > 7) {
+    Serial.print("0 ");
+  } else {
+    Serial.print("1 ");
+  }
+  if (southDistance > 7) {
+    Serial.print("0 ");
+  } else {
+    Serial.print("1 ");
+  }
+  if (westDistance > 7) {
+    Serial.println("0 ");
+  } else {
+    Serial.println("1 ");
+  }
 }
 
 
