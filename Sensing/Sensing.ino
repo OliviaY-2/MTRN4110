@@ -1,3 +1,4 @@
+#include <external_VL6180X.h>
 #include <external_MPU6050_6Axis_MotionApps20.h>
 #include <external_MPU6050.h>
 #include <external_MPU6050_helper_3dmath.h>
@@ -7,8 +8,8 @@
 
 #define INTERRUPT 2
 
-Adafruit_VL6180X laser1 = Adafruit_VL6180X(); //create object using I2C
-Adafruit_VL6180X laser2 = Adafruit_VL6180X(); //create object using I2C
+VL6180X laser1 = VL6180X(); //create object using I2C
+VL6180X laser2 = VL6180X(); //create object using I2C
 MPU6050 IMU; //create MPU6050 object named IMU
 bool dmpReady = false;  // set true if DMP init was successful
 uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
@@ -38,8 +39,8 @@ void setup() {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(INTERRUPT, INPUT);
-  laser1.begin();
-  laser2.begin();
+  Wire.begin();
+  laser2.setAddress(0x32);
 
   Serial.println("Initialising IMU");
   IMU.initialize(); //set up IMU
@@ -151,8 +152,8 @@ void function1 () {
   Serial.println(" cm");
 
   //LiDARs
-  uint8_t range2 = laser1.readRange();
-  uint8_t range2 = laser2.readRange();
+  uint8_t range1 = laser1.readRangeSingle();
+  uint8_t range2 = laser2.readRangeSingle();
   
   Serial.print("Range1 (laser): ");
   Serial.print(range1);
@@ -181,25 +182,25 @@ void function3 () {
   pinMode(echoPin, INPUT);
   long duration = pulseIn(echoPin, HIGH);
   double frontDistance = (duration/2) / 291;
-  uint8_t leftDistance = laser1.readRange()/10;
-  uint8_t rightDistance = laser2.readRange()/10;
+  uint8_t leftDistance = laser1.readRangeSingle()/10;
+  uint8_t rightDistance = laser2.readRangeSingle()/10;
 
   if (leftDistance > 7) {
     Serial.print("0 ");
   } else {
-    Serial.print("1 ")
+    Serial.print("1 ");
   }
 
   if (frontDistance > 7) {
     Serial.print("0 ");
   } else {
-    Serial.print("1 ")
+    Serial.print("1 ");
   }
 
   if (rightDistance > 7) {
     Serial.println("0");
   } else {
-    Serial.println("1")
+    Serial.println("1");
   }
   
 }
