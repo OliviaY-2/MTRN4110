@@ -13,8 +13,10 @@ void setup(){
   Serial.begin(9600);
   Wire.begin();
   pinMode(laser1Pin, OUTPUT);
+  pinMode(laser2Pin, OUTPUT);
   
   digitalWrite(laser1Pin, LOW);
+  digitalWrite(laser2Pin, LOW);
   delay(1000);
   digitalWrite(laser1Pin, HIGH);
   delay(50);
@@ -34,6 +36,8 @@ void setup(){
   Serial.println("LiDAR 1 initialised");
 
   Serial.println("Initialising LiDAR 2");
+  digitalWrite(laser2Pin, HIGH);
+  delay(50);
   laser2.init();
   laser2.configureDefault();
   laser2.setAddress(address2);
@@ -57,5 +61,5 @@ void loop(){
   Serial.print("Range from LiDAR 2: ");
   Serial.print(range2);
   Serial.println(" mm");
-  delay(100);
+  delay(1000);
 }
