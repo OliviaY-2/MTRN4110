@@ -83,21 +83,22 @@ void setup() {
   delay(100);
   Serial.println("LiDAR 2 initialised");
 
-//  Serial.println("Initialising IMU");
-//  IMU.initialize(); //set up IMU
-//  Serial.println("initialising DMP");
-//  devStatus = IMU.dmpInitialize();
-//
-//  if (devStatus == 0) {
-//    Serial.println("DMP initialisation successful");
-//    IMU.setDMPEnabled(true);
-//    attachInterrupt(digitalPinToInterrupt(INTERRUPT), dmpDataReady, RISING);  //set up interrupt
-//    mpuIntStatus = IMU.getIntStatus();
-//    dmpReady = true;
-//    packetSize = IMU.dmpGetFIFOPacketSize();
-//  } else {
-//    Serial.println("DMP initialisation failed");
-//  }
+  Serial.println("Initialising IMU");
+  IMU.initialize(); //set up IMU
+  Serial.println("initialising DMP");
+  devStatus = IMU.dmpInitialize();
+
+
+  if (devStatus == 0) {
+    Serial.println("DMP initialisation successful");
+    IMU.setDMPEnabled(true);
+    attachInterrupt(digitalPinToInterrupt(INTERRUPT), dmpDataReady, RISING);  //set up interrupt
+    mpuIntStatus = IMU.getIntStatus();
+    dmpReady = true;
+    packetSize = IMU.dmpGetFIFOPacketSize();
+  } else {
+    Serial.println("DMP initialisation failed");
+  }
   
   Serial.println("Please enter a number 1 - 4");
   
@@ -142,19 +143,19 @@ void function1 () {
   Serial.println("Entered 1");
 
   //IMU
-//  IMUmeasurement();
-//  Serial.print("Roll: ");
-//  Serial.println(ypr[2] * 180/M_PI);
-//  Serial.print("Pitch: ");
-//  Serial.println(ypr[1] * 180/M_PI);
-//  Serial.print("Yaw: ");
-//  Serial.println(ypr[0] * 180/M_PI);
-//  Serial.print("X acceleration: ");
-//  Serial.println(aaReal.x);
-//  Serial.print("Y acceleration: ");
-//  Serial.println(aaReal.y);
-//  Serial.print("Z acceleration: ");
-//  Serial.println(aaReal.z);
+  IMUmeasurement();
+  Serial.print("Roll: ");
+  Serial.println(ypr[2] * 180/M_PI);
+  Serial.print("Pitch: ");
+  Serial.println(ypr[1] * 180/M_PI);
+  Serial.print("Yaw: ");
+  Serial.println(ypr[0] * 180/M_PI);
+  Serial.print("X acceleration: ");
+  Serial.println(aa.x);
+  Serial.print("Y acceleration: ");
+  Serial.println(aa.y);
+  Serial.print("Z acceleration: ");
+  Serial.println(aa.z);
 
   //ultrasonic sensor
   double cm = ultrasonicRange();
@@ -204,9 +205,6 @@ void function3 () {
   double frontDistance = ultrasonicRange();
   uint8_t leftDistance = laser1.readRangeContinuousMillimeters()/10;
   uint8_t rightDistance = laser2.readRangeContinuousMillimeters()/10;
-  Serial.println(leftDistance);
-  Serial.println(frontDistance);
-  Serial.println(rightDistance);
 
   if (leftDistance > 7) {
     Serial.print("0 ");
@@ -241,16 +239,17 @@ void function4 () {
   uint8_t eastDistance = laser2.readRangeSingle()/10;
   double southDistance;
 
-  delayMicroseconds(3*10^6); //delay 3 seconds for turning purposes
+  Serial.println("rotate clockwise now");
+  delay(3000); //delay 3 seconds for turning purposes
   IMUmeasurement();
   float finYaw = ypr[0] * 180/M_PI; //final yaw in degrees
   float rotation = finYaw - initYaw;
 
-  if (rotation >= 80 && rotation <= 100) { //rotated approx 90 deg
+  if (rotation >= 70 && rotation <= 110) { //rotated approx 90 deg
     southDistance = (double) laser2.readRangeContinuousMillimeters()/10;
-  } else if (rotation >= 170 && rotation <= 190) { //rotated approx 180 deg
+  } else if (rotation >= 160 && rotation <= 200) { //rotated approx 180 deg
     southDistance = ultrasonicRange();
-  } else if (rotation >= 260 && rotation <= 280) { //rotated approx 270 deg
+  } else if (rotation >= 250 && rotation <= 290) { //rotated approx 270 deg
     southDistance = (double) laser1.readRangeContinuousMillimeters()/10;
   }
 
