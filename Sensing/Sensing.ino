@@ -181,20 +181,16 @@ void function2 () {
   Serial.println("Entered 2");
 
   double distance = ultrasonicRange();
-  Serial.println(distance);
   while (distance > 7){ //While there is no obstruction, keep measuring the distance
     distance = ultrasonicRange();
     delay(100);
-    Serial.println("no");
   } //break from loop when a distance less than 7 cm is detected
 
   while (distance < 7) { //while there is an obstruction, wait until it is gone
     distance = ultrasonicRange();
-    Serial.println("yes");
     delay(100);
   } //break from loop when the obstruction is removed
   Serial.println("Message!");
-  Serial.println(distance);
 }
 
 
