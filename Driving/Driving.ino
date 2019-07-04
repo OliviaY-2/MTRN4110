@@ -1,4 +1,5 @@
 #define CellSize 23.5
+#define Pi 3.14159
 
 bool newData = false;
 long receivedNum;
@@ -69,7 +70,24 @@ void decisionTree() {
 }
 
 void function1() {
-  
+  double distanceTravelled = 0;
+  double changeInDistance = 0;
+  duration1 = 0;
+  _Speed = 170; // (2/3)*255
+  digitalWrite(M1, LOW); //set M1 to forward
+  digitalWrite(M2, LOW); //set M2 to forward
+  analogWrite(E1, _Speed); //M1 drives at _Speed
+  analogWrite(E2, _Speed); //M2 drives at _Speed
+  _Speed = 0;
+
+  while (distanceTravelled < CellSize){ //repeatedly measure the distance travelled until it is cell size
+    changeInDistance = duration1/12*Pi*0.42; //12 pules per revolution multiplied by circumference
+    distanceTravelled = changeInDistance + distanceTravelled;
+    duration1 = 0;
+    delay(5);
+  }
+  analogWrite(E1, _Speed); //M1 stops
+  analogWrite(E2, _Speed); //M2 stops
 }
 
 void function2() {
