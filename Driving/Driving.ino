@@ -1,11 +1,13 @@
 #define CellSize 23.5
 #define Pi 3.14159
+#define rightTurnDuration 12
+//^number of pulses in a 90 deg turn.
 
 bool newData = false;
 long receivedNum;
-int E1 = 5; //speed control for motor 1
+int E1 = 5; //speed control for motor 1 (left motor)
 int M1 = 4; //direction control for motor 1
-int E2 = 6; //speed control for motor 2
+int E2 = 6; //speed control for motor 2 (right motor)
 int M2 = 7; //direction control for motor 2
 int _Speed = 0; //speed for motors
 int trigPin = 11; //use 30/1 on mega
@@ -48,9 +50,10 @@ void recvNum() {
 
 void decisionTree() {
   if (newData == true) {
+    newData = false;
     switch (receivedNum){
       case 1:
-        function1();
+        forward1cell();
         break;
       case 2:
         function2();
@@ -65,13 +68,11 @@ void decisionTree() {
         Serial.println("Please enter a number 1 - 4");
         break;
     }
-    newData = false;
   }
 }
 
-void function1() {
+void forward1cell() {
   double distanceTravelled = 0;
-  double changeInDistance = 0;
   duration1 = 0;
   _Speed = 170; // (2/3)*255
   digitalWrite(M1, LOW); //set M1 to forward
@@ -81,21 +82,30 @@ void function1() {
   _Speed = 0;
 
   while (distanceTravelled < CellSize){ //repeatedly measure the distance travelled until it is cell size
-    changeInDistance = duration1/12*Pi*0.42; //12 pules per revolution multiplied by circumference
-    distanceTravelled = changeInDistance + distanceTravelled;
-    duration1 = 0;
-    delay(5);
+    distanceTravelled = duration1/12*Pi*0.42; //12 pules per revolution multiplied by circumference
   }
   analogWrite(E1, _Speed); //M1 stops
   analogWrite(E2, _Speed); //M2 stops
 }
 
 void function2() {
-
+  //READ 90 OR -90 IN TO INPUT
+  int input;
+  while (newData == false){ //wait until intstruction is inputted
+    if (Serial.available() > 0) {
+      input = Serial.parseInt();
+      newData = true;
+    }
+  }
+  if (input == 90){ //turn left
+    turnLeft();
+  } else { //turn right
+    turnRight();
+  }
 }
 
 void function3() {
-  double distance = ultrasonicRange();
+  double distanceFromWall = ultrasonicRange();
   _Speed = 170; // (2/3)*255
   digitalWrite(M1, LOW); //set M1 to forward
   digitalWrite(M2, LOW); //set M2 to forward
@@ -103,8 +113,8 @@ void function3() {
   analogWrite(E2, _Speed); //M2 drives at _Speed
   _Speed = 0;
 
-  while (distance > (CellSize/3)){ //repeatedly measure the distance until it is 1/3 of cell size
-    distance = ultrasonicRange();
+  while (distanceFromWall > (CellSize/3)){ //repeatedly measure the distance until it is 1/3 of cell size
+    distanceFromWall = ultrasonicRange();
   }
   analogWrite(E1, _Speed); //M1 stops
   analogWrite(E2, _Speed); //M2 stops
@@ -181,4 +191,40 @@ void wheelSpeed2()
 
   if(!Direction2)  duration2  ;
   else  duration2--;
+}
+
+
+void turnRight(){
+  digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
+  digitalWrite(M2, LOW); //set M2 (right motor) to forward
+
+  _Speed = 255;
+  duration1 = 0;
+  analogWrite(E1, _Speed); //M1 drives at _Speed
+  analogWrite(E2, _Speed); //M2 drives at _Speed
+  _Speed = 0;
+    
+  while (duration1 < rightTurnDuration) {
+    //do nothing
+  }
+  analogWrite(E1, _Speed); //M1 drives at _Speed
+  analogWrite(E2, _Speed); //M2 drives at _Speed
+}
+
+
+void turnLeft(){
+  digitalWrite(M1, LOW); //set M1 (left motor) to forward
+  digitalWrite(M2, HIGH); //set M2 (right motor) to backward
+  
+  _Speed = 255;
+  duration1 = 0;
+  analogWrite(E1, _Speed); //M1 drives at _Speed
+  analogWrite(E2, _Speed); //M2 drives at _Speed
+  _Speed = 0;
+    
+  while (duration1 < rightTurnDuration) {
+    //do nothing
+  }
+  analogWrite(E1, _Speed); //M1 drives at _Speed
+  analogWrite(E2, _Speed); //M2 drives at _Speed
 }
