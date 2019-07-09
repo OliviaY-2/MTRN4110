@@ -1,3 +1,5 @@
+#include <external_VL6180X.h>
+
 #define CellSize 23.5
 #define Pi 3.14159
 #define rightTurnDuration 12
@@ -5,6 +7,8 @@
 
 bool newData = false;
 long receivedNum;
+VL6180X laser1;
+VL6180X laser2;
 int E1 = 5; //speed control for motor 1 (left motor)
 int M1 = 4; //direction control for motor 1
 int E2 = 6; //speed control for motor 2 (right motor)
@@ -12,6 +16,10 @@ int M2 = 7; //direction control for motor 2
 int _Speed = 0; //speed for motors
 int trigPin = 11; //use 30/1 on mega
 int echoPin = 12; //use 30/1 on mega
+int laser1Pin = 9; //use 28 on mega
+int laser2Pin = 10; //use 29 on mega
+int address1 = 0x30;
+int address2 = 0x32;
 const byte encoder1pinA = 2;//A pin
 const byte encoder1pinB = 8;//B pin
 byte encoder1PinALast;
@@ -25,10 +33,44 @@ boolean Direction2;//the rotation direction
 
 void setup() {
   Serial.begin(9600);
+  Serial.println("Initialising ultrasonic");
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
+  Serial.println("Initialising motors");
   pinMode(M1, OUTPUT);
   pinMode(M2, OUTPUT);
+
+  Serial.println("Initialising LiDAR 1");
+  digitalWrite(laser1Pin, HIGH);
+  delay(50);
+  laser1.init();
+  laser1.configureDefault();
+  laser1.setAddress(address1);
+  laser1.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
+  laser1.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
+  laser1.setTimeout(500);
+  laser1.stopContinuous();
+  laser1.setScaling(1);
+  delay(300);
+  laser1.startInterleavedContinuous(100);
+  delay(100);
+  Serial.println("LiDAR 1 initialised");
+
+  Serial.println("Initialising LiDAR 2");
+  digitalWrite(laser2Pin, HIGH);
+  delay(50);
+  laser2.init();
+  laser2.configureDefault();
+  laser2.setAddress(address2);
+  laser2.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
+  laser2.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
+  laser2.setTimeout(500);
+  laser2.stopContinuous();
+  laser2.setScaling(1);
+  delay(300);
+  laser2.startInterleavedContinuous(100);
+  delay(100);
+  Serial.println("LiDAR 2 initialised");
 
   Encoder1Init();
   Encoder2Init();
@@ -113,7 +155,7 @@ void function3() {
   analogWrite(E2, _Speed); //M2 drives at _Speed
   _Speed = 0;
 
-  while (distanceFromWall > (CellSize/3)){ //repeatedly measure the distance until it is 1/3 of cell size
+  while (distanceFromWall > (CellSize/4)){ //repeatedly measure the distance until it is 1/3 of cell size
     distanceFromWall = ultrasonicRange();
   }
   analogWrite(E1, _Speed); //M1 stops
@@ -121,7 +163,19 @@ void function3() {
 }
 
 void function4() {
-  
+  double leftDistance = 25.0;
+  double rightDistance = 25.0;
+
+  while (leftDistance > 20 || rightDistance > 20) { // while there are turns to make
+    forward1cell(); //drive forward 1
+    leftDistance = laser1.readRangeContinuousMillimeters()/10; //measure distances to the right and left
+    rightDistance = laser2.readRangeContinuousMillimeters()/10;
+    if (leftDistance > 20) { //turn
+      turnLeft();
+    } else if (rightDistance > 20) {
+      turnRight();
+    }
+  }
 }
 
 
