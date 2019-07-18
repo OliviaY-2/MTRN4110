@@ -1,0 +1,41 @@
+Directions are defined with 'up' as it would be in a photo from the webcam:
+// 1: Right
+// 2: Up
+// 3: Left
+// 4: Down
+
+
+We encode the map with an int for each cell of the maze, storing information about that cell's bottom and right wall. We accept that there is redundancy storing the bottom wall values for the bottom row but doing it this way keeps it consistent and simple. Int values should be stored as below:
+
+// 0: No bottom wall, no right wall
+// 1: No bottom wall, yes right wall
+// 2: No bottom wall, uncertain right wall
+// 3: Yes bottom wall, no right wall
+// 4: Yes bottom wall, yes right wall
+// 5: Yes bottom wall, uncertain right wall
+// 6: Uncertain bottom wall, no right wall
+// 7: Uncertain bottom wall, yes right wall
+// 8: Uncertain bottom wall, uncertain right wall
+
+
+This array corresponds to the map below it
+int map1[5][9] = { {3,0,3,3,4,8,8,8,7},
+                   {0,4,0,1,5,8,8,8,7},
+                   {0,3,1,1,0,5,8,8,7},
+                   {1,3,1,1,3,0,8,8,7},
+                   {3,3,3,3,3,4,5,5,4} };
+
+ _ _ _ _ _ _ _ _ _
+|_   _ _ _|.*.*.*.|
+|  _|   |_*.*.*.*.|
+|  _  | |  _*.*.*.|
+| |_  | |_   .*.*.|
+|_ _ _ _ _ _|_*_*_|
+
+
+
+Position is encoded as the element IDs for the above array, with the Y co-ordinate first. For example:
+	top left is 0,0
+	top right is 0,8
+	bottom left is 4,0
+	bottom right is 4,8
