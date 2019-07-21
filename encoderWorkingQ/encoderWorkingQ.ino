@@ -21,36 +21,27 @@ int numPulses = 500;
 void setup() {
   Serial.begin(9600);
   pinMode(M1, OUTPUT);
-  pinMode(M2, OUTPUT);
 
   Encoder1Init();
-  Encoder2Init();
-
-    digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
-    digitalWrite(M2, LOW); //set M2 (right motor) to forward
-  
-    _Speed = 255;
-    duration1 = 0;
-    analogWrite(E1, _Speed); //M1 drives at _Speed
-    analogWrite(E2, _Speed); //M2 drives at _Speed
-    _Speed = 0;
+  digitalWrite(M1, HIGH);
+  analogWrite(E1, 150);
 }
 
 void loop() {
-      Serial.println(duration1);
-if (duration1 > numPulses){
-    analogWrite(E1, _Speed); //M1 drives at _Speed
-    analogWrite(E2, _Speed); //M2 drives at _Speed
 
+  Serial.println(duration1);
+  if (duration1 > numPulses){
+    analogWrite(E1, 0);
+  }
 }
-}
+
 
 
 void Encoder1Init()
 {
-  Direction1 = true;//default -> Forward
+  duration1 = 0;
   pinMode(encoder1pinB,INPUT);
-  attachInterrupt(encoder1pinA, wheelSpeed1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder1pinA), wheelSpeed1, CHANGE);
 }
 
 void wheelSpeed1()
@@ -59,21 +50,5 @@ void wheelSpeed1()
     duration1 = duration1 + 1;
   } else {
     duration1 = duration1 - 1;
-  }
-}
-
-void Encoder2Init()
-{
-  Direction2 = true;//default -> Forward
-  pinMode(encoder2pinB,INPUT);
-  attachInterrupt(encoder2pinA, wheelSpeed1, CHANGE);
-}
-
-void wheelSpeed2()
-{
-    if (digitalRead(encoder2pinA) == digitalRead(encoder2pinB)){
-    duration2 = duration2 + 1;
-  } else {
-    duration2 = duration2 - 1;
   }
 }
