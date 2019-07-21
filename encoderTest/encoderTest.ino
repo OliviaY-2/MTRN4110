@@ -16,7 +16,7 @@ byte encoder2PinALast;
 int duration2;//the number of the pulses
 boolean Direction2;//the rotation direction
 
-int numPulses = 500;
+int numPulses = 352;
 
 void setup() {
   Serial.begin(9600);
@@ -27,7 +27,7 @@ void setup() {
   Encoder2Init();
 
     digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
-    digitalWrite(M2, LOW); //set M2 (right motor) to forward
+    digitalWrite(M2, HIGH); //set M2 (right motor) to forward
   
     _Speed = 255;
     duration1 = 0;
@@ -50,7 +50,7 @@ void Encoder1Init()
 {
   Direction1 = true;//default -> Forward
   pinMode(encoder1pinB,INPUT);
-  attachInterrupt(encoder1pinA, wheelSpeed1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder1pinA), wheelSpeed1, CHANGE);
 }
 
 void wheelSpeed1()

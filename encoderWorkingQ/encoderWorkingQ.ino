@@ -46,6 +46,7 @@ void Encoder1Init()
 
 void wheelSpeed1()
 {
+  //Serial.println("entered");
   if (digitalRead(encoder1pinA) == digitalRead(encoder1pinB)){
     duration1 = duration1 + 1;
   } else {

@@ -2,7 +2,7 @@
 
 #define CellSize 23.5
 #define Pi 3.14159
-#define rightTurnDuration 12
+#define rightTurnDuration 360
 //^number of pulses in a 90 deg turn.
 
 bool newData = false;
@@ -40,37 +40,37 @@ void setup() {
   pinMode(M1, OUTPUT);
   pinMode(M2, OUTPUT);
 
-  Serial.println("Initialising LiDAR 1");
-  digitalWrite(laser1Pin, HIGH);
-  delay(50);
-  laser1.init();
-  laser1.configureDefault();
-  laser1.setAddress(address1);
-  laser1.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
-  laser1.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
-  laser1.setTimeout(500);
-  laser1.stopContinuous();
-  laser1.setScaling(1);
-  delay(300);
-  laser1.startInterleavedContinuous(100);
-  delay(100);
-  Serial.println("LiDAR 1 initialised");
+//  Serial.println("Initialising LiDAR 1");
+//  digitalWrite(laser1Pin, HIGH);
+//  delay(50);
+//  laser1.init();
+//  laser1.configureDefault();
+//  laser1.setAddress(address1);
+//  laser1.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
+//  laser1.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
+//  laser1.setTimeout(500);
+//  laser1.stopContinuous();
+//  laser1.setScaling(1);
+//  delay(300);
+//  laser1.startInterleavedContinuous(100);
+//  delay(100);
+//  Serial.println("LiDAR 1 initialised");
 
-  Serial.println("Initialising LiDAR 2");
-  digitalWrite(laser2Pin, HIGH);
-  delay(50);
-  laser2.init();
-  laser2.configureDefault();
-  laser2.setAddress(address2);
-  laser2.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
-  laser2.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
-  laser2.setTimeout(500);
-  laser2.stopContinuous();
-  laser2.setScaling(1);
-  delay(300);
-  laser2.startInterleavedContinuous(100);
-  delay(100);
-  Serial.println("LiDAR 2 initialised");
+//  Serial.println("Initialising LiDAR 2");
+//  digitalWrite(laser2Pin, HIGH);
+//  delay(50);
+//  laser2.init();
+//  laser2.configureDefault();
+//  laser2.setAddress(address2);
+//  laser2.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
+//  laser2.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
+//  laser2.setTimeout(500);
+//  laser2.stopContinuous();
+//  laser2.setScaling(1);
+//  delay(300);
+//  laser2.startInterleavedContinuous(100);
+//  delay(100);
+//  Serial.println("LiDAR 2 initialised");
 
   Encoder1Init();
   Encoder2Init();
@@ -116,15 +116,16 @@ void decisionTree() {
 void forward1cell() {
   double distanceTravelled = 0;
   duration1 = 0;
-  _Speed = 170; // (2/3)*255
-  digitalWrite(M1, LOW); //set M1 to forward
+  _Speed = 225;
+  digitalWrite(M1, HIGH); //set M1 to forward
   digitalWrite(M2, LOW); //set M2 to forward
   analogWrite(E1, _Speed); //M1 drives at _Speed
   analogWrite(E2, _Speed); //M2 drives at _Speed
   _Speed = 0;
 
   while (distanceTravelled < CellSize){ //repeatedly measure the distance travelled until it is cell size
-    distanceTravelled = duration1/12*Pi*0.42; //12 pules per revolution multiplied by circumference
+    distanceTravelled = duration1/48.00; //48 pulses to 1 cm
+    Serial.println(distanceTravelled);
   }
   analogWrite(E1, _Speed); //M1 stops
   analogWrite(E2, _Speed); //M2 stops
@@ -195,28 +196,16 @@ void Encoder1Init()
 {
   Direction1 = true;//default -> Forward
   pinMode(encoder1pinB,INPUT);
-  attachInterrupt(encoder1pinA, wheelSpeed1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder1pinA), wheelSpeed1, CHANGE);
 }
 
 void wheelSpeed1()
 {
-  int Lstate = digitalRead(encoder1pinA);
-  if((encoder1PinALast == LOW) && Lstate==HIGH)
-  {
-    int val = digitalRead(encoder1pinB);
-    if(val == LOW && Direction1)
-    {
-      Direction1 = false; //Reverse
-    }
-    else if(val == HIGH && !Direction1)
-    {
-      Direction1 = true;  //Forward
-    }
+  if (digitalRead(encoder1pinA) == digitalRead(encoder1pinB)){
+    duration1 = duration1 + 1;
+  } else {
+    duration1 = duration1 - 1;
   }
-  encoder1PinALast = Lstate;
-
-  if(!Direction1)  duration1  ;
-  else  duration1--;
 }
 
 void Encoder2Init()
@@ -228,29 +217,17 @@ void Encoder2Init()
 
 void wheelSpeed2()
 {
-  int Lstate = digitalRead(encoder2pinA);
-  if((encoder2PinALast == LOW) && Lstate==HIGH)
-  {
-    int val = digitalRead(encoder2pinB);
-    if(val == LOW && Direction2)
-    {
-      Direction2 = false; //Reverse
-    }
-    else if(val == HIGH && !Direction2)
-    {
-      Direction2 = true;  //Forward
-    }
+    if (digitalRead(encoder2pinA) == digitalRead(encoder2pinB)){
+    duration2 = duration2 + 1;
+  } else {
+    duration2 = duration2 - 1;
   }
-  encoder2PinALast = Lstate;
-
-  if(!Direction2)  duration2  ;
-  else  duration2--;
 }
 
 
 void turnRight(){
   digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
-  digitalWrite(M2, LOW); //set M2 (right motor) to forward
+  digitalWrite(M2, HIGH); //set M2 (right motor) to forward
 
   _Speed = 255;
   duration1 = 0;
@@ -258,8 +235,8 @@ void turnRight(){
   analogWrite(E2, _Speed); //M2 drives at _Speed
   _Speed = 0;
     
-  while (duration1 < rightTurnDuration) {
-    //do nothing
+  while (abs(duration1) < rightTurnDuration) {
+    Serial.println("do nothing");
   }
   analogWrite(E1, _Speed); //M1 drives at _Speed
   analogWrite(E2, _Speed); //M2 drives at _Speed
@@ -268,7 +245,7 @@ void turnRight(){
 
 void turnLeft(){
   digitalWrite(M1, LOW); //set M1 (left motor) to forward
-  digitalWrite(M2, HIGH); //set M2 (right motor) to backward
+  digitalWrite(M2, LOW); //set M2 (right motor) to backward
   
   _Speed = 255;
   duration1 = 0;
@@ -276,8 +253,8 @@ void turnLeft(){
   analogWrite(E2, _Speed); //M2 drives at _Speed
   _Speed = 0;
     
-  while (duration1 < rightTurnDuration) {
-    //do nothing
+  while (abs(duration1) < rightTurnDuration) {
+    Serial.println(duration1);
   }
   analogWrite(E1, _Speed); //M1 drives at _Speed
   analogWrite(E2, _Speed); //M2 drives at _Speed
