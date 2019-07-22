@@ -74,12 +74,11 @@ void setup() {
 
   Encoder1Init();
   Encoder2Init();
-  function3();
 }
 
 void loop() {
-  //recvNum();
-  //decisionTree();
+  recvNum();
+  decisionTree();
 }
 
 
@@ -134,16 +133,18 @@ void forward1cell() {
 
 void function2() {
   //READ 90 OR -90 IN TO INPUT
+  Serial.println("Enter 90 to turn left or -90 to turn right");
   int input;
   while (newData == false){ //wait until intstruction is inputted
-    if (Serial.available() > 0) {
+    if (Serial.available()) {
       input = Serial.parseInt();
       newData = true;
     }
+    
   }
   if (input == 90){ //turn left
     turnLeft();
-  } else { //turn right
+  } else if (input == -90) { //turn right
     turnRight();
   }
 }
