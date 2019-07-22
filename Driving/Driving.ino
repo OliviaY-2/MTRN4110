@@ -16,7 +16,7 @@ int M2 = 7; //direction control for motor 2
 int _Speed = 0; //speed for motors
 int trigPin = 11; //use 30/1 on mega
 int echoPin = 12; //use 30/1 on mega
-int laser1Pin = 9; //use 28 on mega
+int laser1Pin = 13; //use 28 on mega
 int laser2Pin = 10; //use 29 on mega
 int address1 = 0x30;
 int address2 = 0x32;
@@ -74,11 +74,12 @@ void setup() {
 
   Encoder1Init();
   Encoder2Init();
+  function3();
 }
 
 void loop() {
-  recvNum();
-  decisionTree();
+  //recvNum();
+  //decisionTree();
 }
 
 
@@ -149,14 +150,14 @@ void function2() {
 
 void function3() {
   double distanceFromWall = ultrasonicRange();
-  _Speed = 170; // (2/3)*255
-  digitalWrite(M1, LOW); //set M1 to forward
+  _Speed = 255;
+  digitalWrite(M1, HIGH); //set M1 to forward
   digitalWrite(M2, LOW); //set M2 to forward
   analogWrite(E1, _Speed); //M1 drives at _Speed
   analogWrite(E2, _Speed); //M2 drives at _Speed
   _Speed = 0;
 
-  while (distanceFromWall > (CellSize/4)){ //repeatedly measure the distance until it is 1/3 of cell size
+  while (distanceFromWall > (CellSize/4)){ //repeatedly measure the distance until it is 1/4 of cell size
     distanceFromWall = ultrasonicRange();
   }
   analogWrite(E1, _Speed); //M1 stops
