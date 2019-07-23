@@ -201,6 +201,8 @@ void function2() {
 
 void function3() {
   double distanceFromWall = ultrasonicRange();
+  double leftDistance = laser1.readRangeContinuousMillimeters()/10;
+  double rightDistance = laser2.readRangeContinuousMillimeters()/10;
   _Speed1 = 255;
   _Speed2 = 255;
   digitalWrite(M1, HIGH); //set M1 to forward
@@ -208,8 +210,19 @@ void function3() {
   analogWrite(E1, _Speed1); //M1 drives at _Speed
   analogWrite(E2, _Speed2); //M2 drives at _Speed
 
-  while (distanceFromWall > (CellSize/4)){ //repeatedly measure the distance until it is 1/4 of cell size
+  while (distanceFromWall > (CellSize/5)){ //repeatedly measure the distance until it is 1/5 of cell size
     distanceFromWall = ultrasonicRange();
+    leftDistance = laser1.readRangeContinuousMillimeters()/10; //measure distances to the right and left
+    rightDistance = laser2.readRangeContinuousMillimeters()/10;
+    if (leftDistance < 3) { //if too close to left wall, veer right
+      _Speed1 = 255;
+      _Speed2 = 200;
+    } else if (rightDistance < 3) { //if too close to right wall, veer left
+      _Speed1 = 200;
+      _Speed2 = 255;
+    }
+    analogWrite(E1, _Speed1); //M1 drives at _Speed
+    analogWrite(E2, _Speed2); //M2 drives at _Speed
   }
   analogWrite(E1, 0); //M1 stops
   analogWrite(E2, 0); //M2 stops
