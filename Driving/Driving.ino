@@ -69,6 +69,13 @@ void setup() {
   Serial.println("Initialising motors");
   pinMode(M1, OUTPUT);
   pinMode(M2, OUTPUT);
+  pinMode(INTERRUPT, INPUT);
+
+  pinMode(laser1Pin, OUTPUT);
+  pinMode(laser2Pin, OUTPUT);
+  digitalWrite(laser1Pin, LOW);
+  digitalWrite(laser2Pin, LOW);
+  delay(1000);
 
   Serial.println("Initialising LiDAR 1");
   digitalWrite(laser1Pin, HIGH);
