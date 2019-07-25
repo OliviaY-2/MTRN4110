@@ -130,13 +130,12 @@ void setup() {
 //  } else {
 //    Serial1.println("DMP initialisation failed");
 //  }
-  forward1Cell();
   Serial1.println("Please enter a number 1 - 4");
 }
 
 void loop() {
-  //recvNum();
-  //decisionTree();
+  recvNum();
+  decisionTree();
 }
 
 
