@@ -62,12 +62,12 @@ void dmpDataReady() {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial1.begin(9600);
   Wire.begin();
-  Serial.println("Initialising ultrasonic");
+  Serial1.println("Initialising ultrasonic");
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  Serial.println("Initialising motors");
+  Serial1.println("Initialising motors");
   pinMode(M1, OUTPUT);
   pinMode(M2, OUTPUT);
   pinMode(INTERRUPT, INPUT);
@@ -78,7 +78,7 @@ void setup() {
   digitalWrite(laser2Pin, LOW);
   delay(1000);
 
-  Serial.println("Initialising LiDAR 1");
+  Serial1.println("Initialising LiDAR 1");
   digitalWrite(laser1Pin, HIGH);
   delay(50);
   laser1.init();
@@ -92,9 +92,9 @@ void setup() {
   delay(300);
   laser1.startInterleavedContinuous(100);
   delay(100);
-  Serial.println("LiDAR 1 initialised");
+  Serial1.println("LiDAR 1 initialised");
 
-  Serial.println("Initialising LiDAR 2");
+  Serial1.println("Initialising LiDAR 2");
   digitalWrite(laser2Pin, HIGH);
   delay(50);
   laser2.init();
@@ -108,30 +108,30 @@ void setup() {
   delay(300);
   laser2.startInterleavedContinuous(100);
   delay(100);
-  Serial.println("LiDAR 2 initialised");
+  Serial1.println("LiDAR 2 initialised");
 
-  Serial.println("Initialising encoders");
+  Serial1.println("Initialising encoders");
   Encoder1Init();
   Encoder2Init();
 
-//  Serial.println("Initialising IMU");
+//  Serial1.println("Initialising IMU");
 //  IMU.initialize(); //set up IMU
-//  Serial.println("initialising DMP");
+//  Serial1.println("initialising DMP");
 //  devStatus = IMU.dmpInitialize();
 //
 //
 //  if (devStatus == 0) {
-//    Serial.println("DMP initialisation successful");
+//    Serial1.println("DMP initialisation successful");
 //    IMU.setDMPEnabled(true);
 //    attachInterrupt(digitalPinToInterrupt(INTERRUPT), dmpDataReady, RISING);  //set up interrupt
 //    mpuIntStatus = IMU.getIntStatus();
 //    dmpReady = true;
 //    packetSize = IMU.dmpGetFIFOPacketSize();
 //  } else {
-//    Serial.println("DMP initialisation failed");
+//    Serial1.println("DMP initialisation failed");
 //  }
   forward1Cell();
-  Serial.println("Please enter a number 1 - 4");
+  Serial1.println("Please enter a number 1 - 4");
 }
 
 void loop() {
@@ -141,8 +141,8 @@ void loop() {
 
 
 void recvNum() {
-  if (Serial.available() > 0) {
-    receivedNum = Serial.parseInt();
+  if (Serial1.available() > 0) {
+    receivedNum = Serial1.parseInt();
     newData = true;
    }
 }
@@ -165,7 +165,7 @@ void decisionTree() {
         function4();
         break;
       default:
-        Serial.println("Please enter a number 1 - 4");
+        Serial1.println("Please enter a number 1 - 4");
         break;
     }
   }
@@ -183,7 +183,7 @@ void forward1cell() {
 
   while (distanceTravelled < CellSize){ //repeatedly measure the distance travelled until it is cell size
     distanceTravelled = duration2/48.00; //48 pulses to 1 cm
-    Serial.println(distanceTravelled);
+    Serial1.println(distanceTravelled);
   }
   analogWrite(E1, 0); //M1 stops
   analogWrite(E2, 0); //M2 stops
@@ -191,11 +191,11 @@ void forward1cell() {
 
 void function2() {
   //READ 90 OR -90 IN TO INPUT
-  Serial.println("Enter 90 to turn left or -90 to turn right");
+  Serial1.println("Enter 90 to turn left or -90 to turn right");
   int input;
   while (newData == false){ //wait until intstruction is inputted
-    if (Serial.available()) {
-      input = Serial.parseInt();
+    if (Serial1.available()) {
+      input = Serial1.parseInt();
       newData = true;
     }
     
@@ -310,7 +310,7 @@ void turnRight(){
   analogWrite(E2, 255); //M2 drives at _Speed
     
   while (abs(duration1) < rightTurnDuration) {
-    Serial.println(duration1);
+    Serial1.println(duration1);
   }
   analogWrite(E1, 0); //M1 drives at _Speed
   analogWrite(E2, 0); //M2 drives at _Speed
@@ -326,7 +326,7 @@ void turnLeft(){
   analogWrite(E2, 255); //M2 drives at _Speed
     
   while (abs(duration1) < rightTurnDuration) {
-    Serial.println(duration1);
+    Serial1.println(duration1);
   }
   analogWrite(E1, 0); //M1 stops
   analogWrite(E2, 0); //M2 stops
