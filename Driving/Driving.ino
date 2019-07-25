@@ -38,11 +38,11 @@ int M2 = 7; //direction control for motor 2
 int _Speed1 = 0; //speed for motor 1
 int _Speed2 = 0;
 
-int trigPin = 11; //use 30 on mega
-int echoPin = 12; //use 31 on mega
+int trigPin = 30; //use 30 on mega
+int echoPin = 31; //use 31 on mega
 
-int laser1Pin = 13; //use 28 on mega
-int laser2Pin = 10; //use 29 on mega
+int laser1Pin = 32; //use 32 on mega
+int laser2Pin = 33; //use 33 on mega
 int address1 = 0x30;
 int address2 = 0x32;
 
@@ -63,6 +63,7 @@ void dmpDataReady() {
 
 void setup() {
   Serial.begin(9600);
+  Wire.begin();
   Serial.println("Initialising ultrasonic");
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
@@ -113,29 +114,29 @@ void setup() {
   Encoder1Init();
   Encoder2Init();
 
-  Serial.println("Initialising IMU");
-  IMU.initialize(); //set up IMU
-  Serial.println("initialising DMP");
-  devStatus = IMU.dmpInitialize();
-
-
-  if (devStatus == 0) {
-    Serial.println("DMP initialisation successful");
-    IMU.setDMPEnabled(true);
-    attachInterrupt(digitalPinToInterrupt(INTERRUPT), dmpDataReady, RISING);  //set up interrupt
-    mpuIntStatus = IMU.getIntStatus();
-    dmpReady = true;
-    packetSize = IMU.dmpGetFIFOPacketSize();
-  } else {
-    Serial.println("DMP initialisation failed");
-  }
-  
+//  Serial.println("Initialising IMU");
+//  IMU.initialize(); //set up IMU
+//  Serial.println("initialising DMP");
+//  devStatus = IMU.dmpInitialize();
+//
+//
+//  if (devStatus == 0) {
+//    Serial.println("DMP initialisation successful");
+//    IMU.setDMPEnabled(true);
+//    attachInterrupt(digitalPinToInterrupt(INTERRUPT), dmpDataReady, RISING);  //set up interrupt
+//    mpuIntStatus = IMU.getIntStatus();
+//    dmpReady = true;
+//    packetSize = IMU.dmpGetFIFOPacketSize();
+//  } else {
+//    Serial.println("DMP initialisation failed");
+//  }
+  forward1Cell();
   Serial.println("Please enter a number 1 - 4");
 }
 
 void loop() {
-  recvNum();
-  decisionTree();
+  //recvNum();
+  //decisionTree();
 }
 
 
@@ -172,7 +173,7 @@ void decisionTree() {
 
 void forward1cell() {
   double distanceTravelled = 0;
-  duration1 = 0;
+  duration2 = 0;
   _Speed1 = 225;
   _Speed2 = 255;
   digitalWrite(M1, HIGH); //set M1 to forward
@@ -181,7 +182,7 @@ void forward1cell() {
   analogWrite(E2, _Speed2); //M2 drives at _Speed
 
   while (distanceTravelled < CellSize){ //repeatedly measure the distance travelled until it is cell size
-    distanceTravelled = duration1/48.00; //48 pulses to 1 cm
+    distanceTravelled = duration2/48.00; //48 pulses to 1 cm
     Serial.println(distanceTravelled);
   }
   analogWrite(E1, 0); //M1 stops
@@ -210,23 +211,26 @@ void function3() {
   double distanceFromWall = ultrasonicRange();
   double leftDistance = laser1.readRangeContinuousMillimeters()/10;
   double rightDistance = laser2.readRangeContinuousMillimeters()/10;
-  _Speed1 = 255;
+  _Speed1 = 220;
   _Speed2 = 255;
   digitalWrite(M1, HIGH); //set M1 to forward
   digitalWrite(M2, LOW); //set M2 to forward
   analogWrite(E1, _Speed1); //M1 drives at _Speed
   analogWrite(E2, _Speed2); //M2 drives at _Speed
 
-  while (distanceFromWall > (CellSize/5)){ //repeatedly measure the distance until it is 1/5 of cell size
+  while (distanceFromWall > (CellSize/3)){ //repeatedly measure the distance until it is 1/5 of cell size
     distanceFromWall = ultrasonicRange();
     leftDistance = laser1.readRangeContinuousMillimeters()/10; //measure distances to the right and left
     rightDistance = laser2.readRangeContinuousMillimeters()/10;
-    if (leftDistance < 3) { //if too close to left wall, veer right
+    if (leftDistance < 8) { //if too close to left wall, veer right
       _Speed1 = 255;
       _Speed2 = 200;
-    } else if (rightDistance < 3) { //if too close to right wall, veer left
+    } else if (rightDistance < 0) { //if too close to right wall, veer left
       _Speed1 = 200;
       _Speed2 = 255;
+    } else {
+      _Speed1 = 255;
+      _Speed2 = 220;
     }
     analogWrite(E1, _Speed1); //M1 drives at _Speed
     analogWrite(E2, _Speed2); //M2 drives at _Speed
