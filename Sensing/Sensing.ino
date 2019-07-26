@@ -3,7 +3,6 @@
 #include <external_MPU6050.h>
 #include <external_MPU6050_helper_3dmath.h>
 #include <external_MPU6050_I2Cdev.h>
-#include <Adafruit_VL6180X.h>
 #include <Wire.h>
 
 #define INTERRUPT 2
