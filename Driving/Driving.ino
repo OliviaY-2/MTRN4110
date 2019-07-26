@@ -8,7 +8,6 @@
 #define CellSize 23.
 #define INTERRUPT 27
 //^Only possible on Mega
-#define Pi 3.14159
 #define rightTurnDuration 360
 //^number of pulses in a 90 deg turn.
 
@@ -56,6 +55,8 @@ const byte encoder2pinB = 9;//B pin
 byte encoder2PinALast;
 int duration2;//the number of the pulses
 boolean Direction2;//the rotation direction
+
+float initHeading;
 
 void dmpDataReady() {
     mpuInterrupt = true;
@@ -130,6 +131,8 @@ void setup() {
 //  } else {
 //    Serial1.println("DMP initialisation failed");
 //  }
+
+  adjustInitialHeading();
   Serial1.println("Please enter a number 1 - 4");
 }
 
@@ -356,4 +359,30 @@ void IMUmeasurement() {
     IMU.dmpGetAccel(&aa, fifoBuffer);
     IMU.dmpGetLinearAccel(&aaReal, &aa, &gravity);
   }
+}
+
+void adjustInitialHeading(){
+  double lastLeftDistance = 25.0;
+  double lastRightDistance = 25.0;
+  double distanceFromWall = ultrasonicRange();
+  double currentLeftDistance = laser1.readRangeContinuousMillimeters();
+  double currentRightDistance = laser2.readRangeContinuousMillimeters();
+
+  digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
+  digitalWrite(M2, HIGH); //set M2 (right motor) to forward
+
+  while ( lastLeftDistance > currentLeftDistance && lastRightDistance > currentRightDistance && distanceFromWall < 20.0) { //while values of left and right distances are shrinking and front obstruction within 20cm
+    lastLeftDistance = currentLeftDistance;
+    lastRightDistance = currentRightDistance;
+    analogWrite(E1, 100);
+    analogWrite(E2, 100); //turn right slowly
+    delay(50);
+    distanceFromWall = ultrasonicRange();
+    currentLeftDistance = laser1.readRangeContinuousMillimeters();
+    currentRightDistance = laser2.readRangeContinuousMillimeters();
+  }
+  analogWrite(E1, 0);
+  analogWrite(E2, 0);//stop
+  IMUmeasurement();
+  initHeading = ypr[0] * 180/M_PI;
 }
