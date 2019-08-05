@@ -141,6 +141,61 @@ void loop() {
 
 }
 
+
+void right90deg() {
+  IMUmeasurement();
+  initHeading = ypr[0] *180/M_PI;
+  currHeading = ypr[0] *180/M_PI;
+  digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
+  digitalWrite(M2, HIGH); //set M2 (right motor) to forward
+  analogWrite(E1, 255); //M1 drives at _Speed
+  analogWrite(E2, 255); //M2 drives at _Speed
+
+  while (abs(currHeading - initHeading) < 90){
+    IMUmeasurement();
+    currHeading = ypr[0] *180/M_PI;
+  }
+  analogWrite(E1, 0); //M1 drives at _Speed
+  analogWrite(E2, 0); //M2 drives at _Speed
+}
+
+
+void left90deg() {
+  IMUmeasurement();
+  initHeading = ypr[0] *180/M_PI;
+  currHeading = ypr[0] *180/M_PI;
+  digitalWrite(M1, LOW); //set M1 (left motor) to Backward
+  digitalWrite(M2, LOW); //set M2 (right motor) to forward
+  analogWrite(E1, 255); //M1 drives at _Speed
+  analogWrite(E2, 255); //M2 drives at _Speed
+
+  while (abs(currHeading - initHeading) < 90){
+    IMUmeasurement();
+    currHeading = ypr[0] *180/M_PI;
+  }
+  analogWrite(E1, 0); //M1 drives at _Speed
+  analogWrite(E2, 0); //M2 drives at _Speed
+}
+
+
+void right1800deg() {
+  IMUmeasurement();
+  initHeading = ypr[0] *180/M_PI;
+  currHeading = ypr[0] *180/M_PI;
+  digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
+  digitalWrite(M2, HIGH); //set M2 (right motor) to forward
+  analogWrite(E1, 255); //M1 drives at _Speed
+  analogWrite(E2, 255); //M2 drives at _Speed
+
+  while (abs(currHeading - initHeading) < 180){
+    IMUmeasurement();
+    currHeading = ypr[0] *180/M_PI;
+  }
+  analogWrite(E1, 0); //M1 drives at _Speed
+  analogWrite(E2, 0); //M2 drives at _Speed
+}
+
+
 void adjustInitialHeading(){
   double lastLeftDistance = 25.0;
   double lastRightDistance = 25.0;
@@ -151,7 +206,7 @@ void adjustInitialHeading(){
   digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
   digitalWrite(M2, HIGH); //set M2 (right motor) to forward
 
-  while ( lastLeftDistance > currentLeftDistance && lastRightDistance > currentRightDistance && distanceFromWall < 20.0) { //while values of left and right distances are shrinking and front obstruction within 20cm
+  while ( lastLeftDistance > currentLeftDistance || lastRightDistance > currentRightDistance || distanceFromWall < 20.0) { //while values of left and right distances are shrinking and front obstruction within 20cm
     lastLeftDistance = currentLeftDistance;
     lastRightDistance = currentRightDistance;
     analogWrite(E1, 100);
