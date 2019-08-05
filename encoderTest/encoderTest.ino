@@ -27,7 +27,7 @@ void setup() {
   Encoder2Init();
 
     digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
-    digitalWrite(M2, HIGH); //set M2 (right motor) to forward
+    digitalWrite(M2, LOW); //set M2 (right motor) to forward
   
     _Speed = 255;
     duration1 = 0;
@@ -37,12 +37,12 @@ void setup() {
 }
 
 void loop() {
-      Serial.println(duration1);
-if (duration1 > numPulses){
-    analogWrite(E1, _Speed); //M1 drives at _Speed
-    analogWrite(E2, _Speed); //M2 drives at _Speed
-
-}
+//      Serial.println(duration1);
+//if (duration1 > numPulses){
+//    analogWrite(E1, _Speed); //M1 drives at _Speed
+//    analogWrite(E2, _Speed); //M2 drives at _Speed
+//
+//}
 }
 
 
