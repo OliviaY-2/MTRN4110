@@ -142,10 +142,84 @@ void loop() {
 }
 
 
+void forward1cell(){
+  IMUmeasurement();
+  initHeading = ypr[0]*180/M_PI;
+  double currHeading = initHeading;
+  double distanceTravelled = 0;
+  double angle = 0;
+  duration1 = 0;
+  duration2 = 0;
+  digitalWrite(M1, HIGH); //set M1 to forward
+  digitalWrite(M2, LOW); //set M2 to forward
+  analogWrite(E1, 255);
+  analogWrite(E2, 255);
+  delay(50);
+
+  while (distanceTravelled < CellSize) {
+    IMUmeasurement();
+    currHeading = ypr[0]*180/M_PI; 
+    angle = currHeading - initHeading;//assuming negative is to the left
+    if (angle < 0){ //bear right
+      _Speed1 = 255;
+      _Speed2 = 255 - angle*10;
+      distanceTravelled = distanceTravelled + (duration2/48.00)*cos(angle);
+    } else { //bear left
+      _Speed1 = 255 - angle*10;
+      _Speed2 = 255;
+      distanceTravelled = distanceTravelled + (duration1/48.00)*cos(angle);
+    }
+    analogWrite(E1, _Speed1);
+    analogWrite(E2, _Speed2);
+    
+  }
+  
+  analogWrite(E1, 0);
+  analogWrite(E2, 0);
+}
+
+
+void back1cell(){
+  IMUmeasurement();
+  initHeading = ypr[0]*180/M_PI;
+  double currHeading = initHeading;
+  double distanceTravelled = 0;
+  double angle = 0;
+  duration1 = 0;
+  duration2 = 0;
+  digitalWrite(M1, LOW); //set M1 to backward
+  digitalWrite(M2, HIGH); //set M2 to backward
+  analogWrite(E1, 255);
+  analogWrite(E2, 255);
+  delay(50);
+
+  while (distanceTravelled < CellSize) {
+    IMUmeasurement();
+    currHeading = ypr[0]*180/M_PI; 
+    angle = currHeading - initHeading;//assuming negative is to the left
+    if (angle < 0){ //bear right
+      _Speed1 = 255;
+      _Speed2 = 255 - angle*10;
+      distanceTravelled = distanceTravelled + (duration2/48.00)*cos(angle);
+    } else { //bear left
+      _Speed1 = 255 - angle*10;
+      _Speed2 = 255;
+      distanceTravelled = distanceTravelled + (duration1/48.00)*cos(angle);
+    }
+    analogWrite(E1, _Speed1);
+    analogWrite(E2, _Speed2);
+    
+  }
+  
+  analogWrite(E1, 0);
+  analogWrite(E2, 0);
+}
+
+
 void right90deg() {
   IMUmeasurement();
   initHeading = ypr[0] *180/M_PI;
-  currHeading = ypr[0] *180/M_PI;
+  double currHeading = ypr[0] *180/M_PI;
   digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
   digitalWrite(M2, HIGH); //set M2 (right motor) to forward
   analogWrite(E1, 255); //M1 drives at _Speed
@@ -163,7 +237,7 @@ void right90deg() {
 void left90deg() {
   IMUmeasurement();
   initHeading = ypr[0] *180/M_PI;
-  currHeading = ypr[0] *180/M_PI;
+  double currHeading = ypr[0] *180/M_PI;
   digitalWrite(M1, LOW); //set M1 (left motor) to Backward
   digitalWrite(M2, LOW); //set M2 (right motor) to forward
   analogWrite(E1, 255); //M1 drives at _Speed
@@ -181,7 +255,7 @@ void left90deg() {
 void right1800deg() {
   IMUmeasurement();
   initHeading = ypr[0] *180/M_PI;
-  currHeading = ypr[0] *180/M_PI;
+  double currHeading = ypr[0] *180/M_PI;
   digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
   digitalWrite(M2, HIGH); //set M2 (right motor) to forward
   analogWrite(E1, 255); //M1 drives at _Speed
