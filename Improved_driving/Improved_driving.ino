@@ -1,3 +1,7 @@
+//IMU ORIENTATION
+//Y axis forward
+//Z axis up
+
 #include <external_VL6180X.h>
 #include <external_MPU6050_6Axis_MotionApps20.h>
 #include <external_MPU6050.h>
@@ -8,8 +12,6 @@
 #define CellSize 23.
 #define INTERRUPT 27
 //^Only possible on Mega
-#define rightTurnDuration 360
-//^number of pulses in a 90 deg turn.
 
 bool newData = false;
 long receivedNum;
@@ -148,32 +150,32 @@ void forward1cell(){
   double currHeading = initHeading;
   double distanceTravelled = 0;
   double angle = 0;
-  duration1 = 0;
-  duration2 = 0;
+  int currTime = 0;
+  int lastTime = 0;
   digitalWrite(M1, HIGH); //set M1 to forward
   digitalWrite(M2, LOW); //set M2 to forward
   analogWrite(E1, 255);
   analogWrite(E2, 255);
+  currTime = millis();
   delay(50);
 
   while (distanceTravelled < CellSize) {
+    lastTime = currTime;
     IMUmeasurement();
     currHeading = ypr[0]*180/M_PI; 
     angle = currHeading - initHeading;//assuming negative is to the left
+    currTime = millis();
+    distanceTravelled = distanceTravelled + 0.5*aa.y*pow((currTime-lastTime)/1000,2);
     if (angle < 0){ //bear right
       _Speed1 = 255;
       _Speed2 = 255 - angle*10;
-      distanceTravelled = distanceTravelled + (duration2/48.00)*cos(angle);
     } else { //bear left
       _Speed1 = 255 - angle*10;
       _Speed2 = 255;
-      distanceTravelled = distanceTravelled + (duration1/48.00)*cos(angle);
     }
     analogWrite(E1, _Speed1);
     analogWrite(E2, _Speed2);
-    
   }
-  
   analogWrite(E1, 0);
   analogWrite(E2, 0);
 }
@@ -185,32 +187,69 @@ void back1cell(){
   double currHeading = initHeading;
   double distanceTravelled = 0;
   double angle = 0;
-  duration1 = 0;
-  duration2 = 0;
+  int currTime = 0;
+  int lastTime = 0;
   digitalWrite(M1, LOW); //set M1 to backward
   digitalWrite(M2, HIGH); //set M2 to backward
   analogWrite(E1, 255);
   analogWrite(E2, 255);
+  currTime = millis();
   delay(50);
 
   while (distanceTravelled < CellSize) {
+    lastTime = currTime;
     IMUmeasurement();
     currHeading = ypr[0]*180/M_PI; 
     angle = currHeading - initHeading;//assuming negative is to the left
+    currTime = millis();
+    distanceTravelled = distanceTravelled + 0.5*aa.y*pow((currTime-lastTime)/1000,2);
     if (angle < 0){ //bear right
       _Speed1 = 255;
       _Speed2 = 255 - angle*10;
-      distanceTravelled = distanceTravelled + (duration2/48.00)*cos(angle);
     } else { //bear left
       _Speed1 = 255 - angle*10;
       _Speed2 = 255;
-      distanceTravelled = distanceTravelled + (duration1/48.00)*cos(angle);
     }
     analogWrite(E1, _Speed1);
     analogWrite(E2, _Speed2);
-    
   }
-  
+  analogWrite(E1, 0);
+  analogWrite(E2, 0);
+}
+
+
+void forwardXcell(int X){
+  IMUmeasurement();
+  initHeading = ypr[0]*180/M_PI;
+  double currHeading = initHeading;
+  double distanceTravelled = 0;
+  double angle = 0;
+  int currTime = 0;
+  int lastTime = 0;
+  digitalWrite(M1, HIGH); //set M1 to forward
+  digitalWrite(M2, LOW); //set M2 to forward
+  analogWrite(E1, 255);
+  analogWrite(E2, 255);
+  currTime = millis();
+  delay(50);
+
+  while (distanceTravelled < X*CellSize) {
+    lastTime = currTime;
+    IMUmeasurement();
+    currHeading = ypr[0]*180/M_PI; 
+    angle = currHeading - initHeading;//assuming negative is to the left
+    currTime = millis();
+    distanceTravelled = distanceTravelled + 0.5*aa.y*pow((currTime-lastTime)/1000,2);
+    if (angle < 0){ //bear right
+      _Speed1 = 255;
+      _Speed2 = 255 - angle*10;
+    } else { //bear left
+      _Speed1 = 255 - angle*10;
+      _Speed2 = 255;
+    }
+    analogWrite(E1, _Speed1);
+    analogWrite(E2, _Speed2);
+  }
   analogWrite(E1, 0);
   analogWrite(E2, 0);
 }
@@ -226,6 +265,24 @@ void right90deg() {
   analogWrite(E2, 255); //M2 drives at _Speed
 
   while (abs(currHeading - initHeading) < 90){
+    IMUmeasurement();
+    currHeading = ypr[0] *180/M_PI;
+  }
+  analogWrite(E1, 0); //M1 drives at _Speed
+  analogWrite(E2, 0); //M2 drives at _Speed
+}
+
+
+void rightXdeg(int X) {
+  IMUmeasurement();
+  initHeading = ypr[0] *180/M_PI;
+  double currHeading = ypr[0] *180/M_PI;
+  digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
+  digitalWrite(M2, HIGH); //set M2 (right motor) to forward
+  analogWrite(E1, 255); //M1 drives at _Speed
+  analogWrite(E2, 255); //M2 drives at _Speed
+
+  while (abs(currHeading - initHeading) < X){
     IMUmeasurement();
     currHeading = ypr[0] *180/M_PI;
   }
@@ -252,7 +309,25 @@ void left90deg() {
 }
 
 
-void right1800deg() {
+void leftXdeg() {
+  IMUmeasurement();
+  initHeading = ypr[0] *180/M_PI;
+  double currHeading = ypr[0] *180/M_PI;
+  digitalWrite(M1, LOW); //set M1 (left motor) to Backward
+  digitalWrite(M2, LOW); //set M2 (right motor) to forward
+  analogWrite(E1, 255); //M1 drives at _Speed
+  analogWrite(E2, 255); //M2 drives at _Speed
+
+  while (abs(currHeading - initHeading) < X){
+    IMUmeasurement();
+    currHeading = ypr[0] *180/M_PI;
+  }
+  analogWrite(E1, 0); //M1 drives at _Speed
+  analogWrite(E2, 0); //M2 drives at _Speed
+}
+
+
+void right180deg() {
   IMUmeasurement();
   initHeading = ypr[0] *180/M_PI;
   double currHeading = ypr[0] *180/M_PI;
