@@ -46,41 +46,41 @@ void setup() {
   pinMode(laser1Pin, OUTPUT);
   pinMode(laser2Pin, OUTPUT);
   
-  digitalWrite(laser1Pin, LOW);
-  digitalWrite(laser2Pin, LOW);
-  delay(1000);
-
-  Serial.println("Initialising LiDAR 1");
-  digitalWrite(laser1Pin, HIGH);
-  delay(50);
-  laser1.init();
-  laser1.configureDefault();
-  laser1.setAddress(address1);
-  laser1.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
-  laser1.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
-  laser1.setTimeout(500);
-  laser1.stopContinuous();
-  laser1.setScaling(1);
-  delay(300);
-  laser1.startInterleavedContinuous(100);
-  delay(100);
-  Serial.println("LiDAR 1 initialised");
-
-  Serial.println("Initialising LiDAR 2");
-  digitalWrite(laser2Pin, HIGH);
-  delay(50);
-  laser2.init();
-  laser2.configureDefault();
-  laser2.setAddress(address2);
-  laser2.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
-  laser2.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
-  laser2.setTimeout(500);
-  laser2.stopContinuous();
-  laser2.setScaling(1);
-  delay(300);
-  laser2.startInterleavedContinuous(100);
-  delay(100);
-  Serial.println("LiDAR 2 initialised");
+//  digitalWrite(laser1Pin, LOW);
+//  digitalWrite(laser2Pin, LOW);
+//  delay(1000);
+//
+//  Serial.println("Initialising LiDAR 1");
+//  digitalWrite(laser1Pin, HIGH);
+//  delay(50);
+//  laser1.init();
+//  laser1.configureDefault();
+//  laser1.setAddress(address1);
+//  laser1.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
+//  laser1.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
+//  laser1.setTimeout(500);
+//  laser1.stopContinuous();
+//  laser1.setScaling(1);
+//  delay(300);
+//  laser1.startInterleavedContinuous(100);
+//  delay(100);
+//  Serial.println("LiDAR 1 initialised");
+//
+//  Serial.println("Initialising LiDAR 2");
+//  digitalWrite(laser2Pin, HIGH);
+//  delay(50);
+//  laser2.init();
+//  laser2.configureDefault();
+//  laser2.setAddress(address2);
+//  laser2.writeReg(VL6180X::SYSRANGE__MAX_CONVERGENCE_TIME, 30);
+//  laser2.writeReg16Bit(VL6180X::SYSALS__INTEGRATION_PERIOD, 50);
+//  laser2.setTimeout(500);
+//  laser2.stopContinuous();
+//  laser2.setScaling(1);
+//  delay(300);
+//  laser2.startInterleavedContinuous(100);
+//  delay(100);
+//  Serial.println("LiDAR 2 initialised");
 
   Serial.println("Initialising IMU");
   IMU.initialize(); //set up IMU
@@ -156,22 +156,22 @@ void function1 () {
   Serial.print("Z acceleration: ");
   Serial.println(aa.z);
 
-  //ultrasonic sensor
-  double cm = ultrasonicRange();
-  Serial.print("Distance (ultrasonic): ");
-  Serial.print(cm);
-  Serial.println(" cm");
-
-  //LiDARs
-  uint8_t range1 = laser1.readRangeContinuousMillimeters();
-  uint8_t range2 = laser2.readRangeContinuousMillimeters();
-  
-  Serial.print("Range1 (laser): ");
-  Serial.print(range1);
-  Serial.println("mm");
-  Serial.print("Range2 (laser): ");
-  Serial.print(range2);
-  Serial.println("mm");
+//  //ultrasonic sensor
+//  double cm = ultrasonicRange();
+//  Serial.print("Distance (ultrasonic): ");
+//  Serial.print(cm);
+//  Serial.println(" cm");
+//
+//  //LiDARs
+//  uint8_t range1 = laser1.readRangeContinuousMillimeters();
+//  uint8_t range2 = laser2.readRangeContinuousMillimeters();
+//  
+//  Serial.print("Range1 (laser): ");
+//  Serial.print(range1);
+//  Serial.println("mm");
+//  Serial.print("Range2 (laser): ");
+//  Serial.print(range2);
+//  Serial.println("mm");
 }
 
 
@@ -285,6 +285,7 @@ double ultrasonicRange() {
 
 
 void IMUmeasurement() {
+  Serial.println("entered IMU measurement");
   while (!mpuInterrupt && fifoCount < packetSize) {
     if (mpuInterrupt && fifoCount < packetSize) {
       fifoCount = IMU.getFIFOCount();
@@ -309,4 +310,5 @@ void IMUmeasurement() {
     IMU.dmpGetAccel(&aa, fifoBuffer);
     IMU.dmpGetLinearAccel(&aaReal, &aa, &gravity);
   }
+  Serial.println("leaving IMU");
 }

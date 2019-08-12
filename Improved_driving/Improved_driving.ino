@@ -9,8 +9,8 @@
 #include <external_MPU6050_I2Cdev.h>
 #include <Wire.h>
 
-#define CellSize 23.
-#define INTERRUPT 27
+#define CellSize 23
+#define INTERRUPT 2
 //^Only possible on Mega
 
 bool newData = false;
@@ -47,7 +47,7 @@ int laser2Pin = 33; //use 33 on mega
 int address1 = 0x30;
 int address2 = 0x32;
 
-const byte encoder1pinA = 2;//A pin
+const byte encoder1pinA = 10;//A pin
 const byte encoder1pinB = 8;//B pin
 byte encoder1PinALast;
 int duration1;//the number of the pulses
@@ -65,12 +65,12 @@ void dmpDataReady() {
 }
 
 void setup() {
-  Serial1.begin(9600);
+  Serial.begin(9600);
   Wire.begin();
-  Serial1.println("Initialising ultrasonic");
+  Serial.println("Initialising ultrasonic");
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  Serial1.println("Initialising motors");
+  Serial.println("Initialising motors");
   pinMode(M1, OUTPUT);
   pinMode(M2, OUTPUT);
   pinMode(INTERRUPT, INPUT);
@@ -81,7 +81,7 @@ void setup() {
   digitalWrite(laser2Pin, LOW);
   delay(1000);
 
-  Serial1.println("Initialising LiDAR 1");
+  Serial.println("Initialising LiDAR 1");
   digitalWrite(laser1Pin, HIGH);
   delay(50);
   laser1.init();
@@ -95,9 +95,9 @@ void setup() {
   delay(300);
   laser1.startInterleavedContinuous(100);
   delay(100);
-  Serial1.println("LiDAR 1 initialised");
+  Serial.println("LiDAR 1 initialised");
 
-  Serial1.println("Initialising LiDAR 2");
+  Serial.println("Initialising LiDAR 2");
   digitalWrite(laser2Pin, HIGH);
   delay(50);
   laser2.init();
@@ -111,35 +111,32 @@ void setup() {
   delay(300);
   laser2.startInterleavedContinuous(100);
   delay(100);
-  Serial1.println("LiDAR 2 initialised");
+  Serial.println("LiDAR 2 initialised");
 
-  Serial1.println("Initialising encoders");
+  Serial.println("Initialising encoders");
   Encoder1Init();
   Encoder2Init();
 
-  Serial1.println("Initialising IMU");
+  Serial.println("Initialising IMU");
   IMU.initialize(); //set up IMU
-  Serial1.println("initialising DMP");
+  Serial.println("initialising DMP");
   devStatus = IMU.dmpInitialize();
 
 
   if (devStatus == 0) {
-    Serial1.println("DMP initialisation successful");
+    Serial.println("DMP initialisation successful");
     IMU.setDMPEnabled(true);
     attachInterrupt(digitalPinToInterrupt(INTERRUPT), dmpDataReady, RISING);  //set up interrupt
     mpuIntStatus = IMU.getIntStatus();
     dmpReady = true;
     packetSize = IMU.dmpGetFIFOPacketSize();
   } else {
-    Serial1.println("DMP initialisation failed");
+    Serial.println("DMP initialisation failed");
   }
-
-  adjustInitialHeading();
-  Serial1.println("Please enter a number 1 - 4");
+  forward1cell();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
 
 }
 
@@ -261,10 +258,10 @@ void right90deg() {
   double currHeading = ypr[0] *180/M_PI;
   digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
   digitalWrite(M2, HIGH); //set M2 (right motor) to forward
-  analogWrite(E1, 255); //M1 drives at _Speed
-  analogWrite(E2, 255); //M2 drives at _Speed
+  analogWrite(E1, 180); //M1 drives at _Speed
+  analogWrite(E2, 180); //M2 drives at _Speed
 
-  while (abs(currHeading - initHeading) < 90){
+  while (abs(currHeading - initHeading) < 70){
     IMUmeasurement();
     currHeading = ypr[0] *180/M_PI;
   }
@@ -279,10 +276,10 @@ void rightXdeg(int X) {
   double currHeading = ypr[0] *180/M_PI;
   digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
   digitalWrite(M2, HIGH); //set M2 (right motor) to forward
-  analogWrite(E1, 255); //M1 drives at _Speed
-  analogWrite(E2, 255); //M2 drives at _Speed
+  analogWrite(E1, 180); //M1 drives at _Speed
+  analogWrite(E2, 180); //M2 drives at _Speed
 
-  while (abs(currHeading - initHeading) < X){
+  while (abs(currHeading - initHeading) < (X-20)){
     IMUmeasurement();
     currHeading = ypr[0] *180/M_PI;
   }
@@ -297,10 +294,11 @@ void left90deg() {
   double currHeading = ypr[0] *180/M_PI;
   digitalWrite(M1, LOW); //set M1 (left motor) to Backward
   digitalWrite(M2, LOW); //set M2 (right motor) to forward
-  analogWrite(E1, 255); //M1 drives at _Speed
-  analogWrite(E2, 255); //M2 drives at _Speed
+  analogWrite(E1, 180); //M1 drives at _Speed
+  analogWrite(E2, 180); //M2 drives at _Speed
+ 
 
-  while (abs(currHeading - initHeading) < 90){
+  while (abs(initHeading - currHeading) < 70){
     IMUmeasurement();
     currHeading = ypr[0] *180/M_PI;
   }
@@ -309,16 +307,16 @@ void left90deg() {
 }
 
 
-void leftXdeg() {
+void leftXdeg(int X) {
   IMUmeasurement();
   initHeading = ypr[0] *180/M_PI;
   double currHeading = ypr[0] *180/M_PI;
   digitalWrite(M1, LOW); //set M1 (left motor) to Backward
   digitalWrite(M2, LOW); //set M2 (right motor) to forward
-  analogWrite(E1, 255); //M1 drives at _Speed
-  analogWrite(E2, 255); //M2 drives at _Speed
+  analogWrite(E1, 180); //M1 drives at _Speed
+  analogWrite(E2, 180); //M2 drives at _Speed
 
-  while (abs(currHeading - initHeading) < X){
+  while (abs(currHeading - initHeading) < (X-20)){
     IMUmeasurement();
     currHeading = ypr[0] *180/M_PI;
   }
@@ -333,10 +331,10 @@ void right180deg() {
   double currHeading = ypr[0] *180/M_PI;
   digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
   digitalWrite(M2, HIGH); //set M2 (right motor) to forward
-  analogWrite(E1, 255); //M1 drives at _Speed
-  analogWrite(E2, 255); //M2 drives at _Speed
+  analogWrite(E1, 180); //M1 drives at _Speed
+  analogWrite(E2, 180); //M2 drives at _Speed
 
-  while (abs(currHeading - initHeading) < 180){
+  while (abs(currHeading - initHeading) < 160){
     IMUmeasurement();
     currHeading = ypr[0] *180/M_PI;
   }
