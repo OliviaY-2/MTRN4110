@@ -39,3 +39,13 @@ Position is encoded as the element IDs for the above array, with the Y co-ordina
 	top right is 0,8
 	bottom left is 4,0
 	bottom right is 4,8
+	
+	
+
+PATH PLANNING STEPS
+The non-localised instructions from the path planning algorithm will be added to a string called 'instructions', where:
+	1: Drive forward (1 cell)
+	2: Rotate left (on the spot, no forward motion)
+	3: Rotate right (on the spot, no forward motion)
+	0: End of instructions (i.e. you are at the center) 
+
