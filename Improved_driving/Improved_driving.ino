@@ -133,11 +133,11 @@ void setup() {
   } else {
     Serial.println("DMP initialisation failed");
   }
-  forward1cell();
 }
 
 void loop() {
-
+  forward1cell();
+  delay(1000);
 }
 
 
@@ -145,30 +145,27 @@ void forward1cell(){
   IMUmeasurement();
   initHeading = ypr[0]*180/M_PI;
   double currHeading = initHeading;
-  double distanceTravelled = 0;
+  double distanceFrom = u
   double angle = 0;
-  int currTime = 0;
-  int lastTime = 0;
+  duration1 = 0;
+  duration2 = 0;
   digitalWrite(M1, HIGH); //set M1 to forward
   digitalWrite(M2, LOW); //set M2 to forward
   analogWrite(E1, 255);
   analogWrite(E2, 255);
-  currTime = millis();
-  delay(50);
-
+  
   while (distanceTravelled < CellSize) {
-    lastTime = currTime;
     IMUmeasurement();
     currHeading = ypr[0]*180/M_PI; 
     angle = currHeading - initHeading;//assuming negative is to the left
-    currTime = millis();
-    distanceTravelled = distanceTravelled + 0.5*aa.y*pow((currTime-lastTime)/1000,2);
     if (angle < 0){ //bear right
       _Speed1 = 255;
       _Speed2 = 255 - angle*10;
+      distanceTravelled = distanceTravelled + duration1/48.00*cos(angle);
     } else { //bear left
       _Speed1 = 255 - angle*10;
       _Speed2 = 255;
+      distanceTravelled = distanceTravelled + duration2/48.00*cos(angle);
     }
     analogWrite(E1, _Speed1);
     analogWrite(E2, _Speed2);
