@@ -49,6 +49,9 @@ int bestSolutionUncertain[30][5];
 int bestSolutionCertain[30][5];
 int currentSolution[30][5];
 
+// String storing forward rotate etc instructions
+String instructions = "";
+
 // Some variables to store the information that will be used to confirm that
 // the map has been fully explored
 int uncertainSteps = 0;
@@ -300,6 +303,14 @@ void extractSolution(bool includeUncertain)
     // When we find the finishing tile
     if (positions[i][0] == targetCell[0] && positions[i][1] == targetCell[1])
     {
+      // Reset variables
+      prevDir = 0;
+      dir = 0;
+      prevPoint = {0,0,0,0,0};
+      j = 0;
+      foundStart = false;
+      memset(currentSolution, -1, sizeof(currentSolution));
+      
       // Set the first element of currentSolution to the finishing move specified by positions[i]
       for (int p = 0; p < 5; p++)
       {
@@ -477,12 +488,15 @@ void printSolution(bool includeUncertain)
           if (dir - prevDir == 1 || prevDir == 4 && dir == 1)
           {
             steps += "Rotate left\n";
+            instructions += "2";
           }
           else if (prevDir - dir == 1 || prevDir == 1 && dir == 4)
           {
             steps += "Rotate right\n";
+            instructions += "3";
           }
           steps += "Drive forward\n";
+          instructions += "1";
         }
 
         // Assign prevPoint
@@ -492,6 +506,7 @@ void printSolution(bool includeUncertain)
         }
       }
     }
+    instructions += "0";
     Serial.println();
     Serial.println("Non-localised steps:");
     Serial.println(steps);
