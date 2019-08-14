@@ -134,7 +134,7 @@ void setMotorSpeed(int motor, int _speed);
 // PathToDrive V1.00
 ///////////////////////////////////////
 
-char receivedNum;
+char receivedNum = 'A';
 boolean newData = false;
 
 void recvNum ();
@@ -146,11 +146,11 @@ void decisionTree ();
 
 void setup() {
   Serial.begin(9600);
+  pathFromSerial();
 }
 
 void loop() {
-  recvNum();
-  decisionTree();
+
 }
 
 
@@ -183,4 +183,26 @@ void decisionTree() {
     }
     newData = false;
   }
+}
+
+
+void pathFromSerial() {
+  receivedNum = 'A';
+  while (receivedNum != '0'){
+    recvNum();
+    decisionTree();
+  }
+}
+
+void forward1cell(){
+  Serial.println("forward");
+}
+
+
+void left90deg() {
+  Serial.println("left");
+}
+
+void right90deg() {
+  Serial.println("right");
 }
