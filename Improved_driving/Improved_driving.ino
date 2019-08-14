@@ -11,7 +11,6 @@
 
 #define CellSize 23
 #define INTERRUPT 2
-//^Only possible on Mega
 
 bool newData = false;
 long receivedNum;
@@ -58,7 +57,6 @@ byte encoder2PinALast;
 int duration2;//the number of the pulses
 boolean Direction2;//the rotation direction
 
-float initHeading;
 
 void dmpDataReady() {
     mpuInterrupt = true;
@@ -133,11 +131,11 @@ void setup() {
   } else {
     Serial.println("DMP initialisation failed");
   }
+  adjustInitialHeading();
 }
 
 void loop() {
-  forward1cell();
-  delay(1000);
+  
 }
 
 
@@ -145,7 +143,7 @@ void forward1cell(){
   IMUmeasurement();
   initHeading = ypr[0]*180/M_PI;
   double currHeading = initHeading;
-  double distanceFrom = u
+  double distanceFrom = ultrasonicRange();
   double angle = 0;
   duration1 = 0;
   duration2 = 0;
@@ -154,18 +152,16 @@ void forward1cell(){
   analogWrite(E1, 255);
   analogWrite(E2, 255);
   
-  while (distanceTravelled < CellSize) {
+  while (distanceFrom < CellSize) {
     IMUmeasurement();
     currHeading = ypr[0]*180/M_PI; 
     angle = currHeading - initHeading;//assuming negative is to the left
     if (angle < 0){ //bear right
       _Speed1 = 255;
       _Speed2 = 255 - angle*10;
-      distanceTravelled = distanceTravelled + duration1/48.00*cos(angle);
     } else { //bear left
       _Speed1 = 255 - angle*10;
       _Speed2 = 255;
-      distanceTravelled = distanceTravelled + duration2/48.00*cos(angle);
     }
     analogWrite(E1, _Speed1);
     analogWrite(E2, _Speed2);
@@ -343,27 +339,22 @@ void right180deg() {
 void adjustInitialHeading(){
   double lastLeftDistance = 25.0;
   double lastRightDistance = 25.0;
-  double distanceFromWall = ultrasonicRange();
   double currentLeftDistance = laser1.readRangeContinuousMillimeters();
   double currentRightDistance = laser2.readRangeContinuousMillimeters();
 
   digitalWrite(M1, HIGH); //set M1 (left motor) to Backward
   digitalWrite(M2, HIGH); //set M2 (right motor) to forward
 
-  while ( lastLeftDistance > currentLeftDistance || lastRightDistance > currentRightDistance || distanceFromWall < 20.0) { //while values of left and right distances are shrinking and front obstruction within 20cm
+  while ( lastLeftDistance > currentLeftDistance || lastRightDistance > currentRightDistance) { //while values of left and right distances are shrinking
     lastLeftDistance = currentLeftDistance;
     lastRightDistance = currentRightDistance;
-    analogWrite(E1, 100);
-    analogWrite(E2, 100); //turn right slowly
-    delay(50);
-    distanceFromWall = ultrasonicRange();
+    analogWrite(E1, 50);
+    analogWrite(E2, 50); //turn right slowly
     currentLeftDistance = laser1.readRangeContinuousMillimeters();
     currentRightDistance = laser2.readRangeContinuousMillimeters();
   }
   analogWrite(E1, 0);
   analogWrite(E2, 0);//stop
-  IMUmeasurement();
-  initHeading = ypr[0] * 180/M_PI;
 }
 
 
