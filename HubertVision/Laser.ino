@@ -1,10 +1,14 @@
-
 /*
 ///////////////////////////////////////////////
-// Laser V2.02
+// Laser V2.04 changed
 ///////////////////////////////////////////////
 
 #include <external_VL6180X.h>
+#ifndef WIRE_H_INCLUDED
+#define WIRE_H_INCLUDED
+#include <Wire.h>
+#endif
+
 
 //use 33 on mega
 #define LASER1PIN 33
@@ -27,7 +31,7 @@ void testLasers();
 void initLaser(VL6180X &laser, int laserPin, int address) {
   pinMode(laserPin, OUTPUT);
   digitalWrite(laserPin, LOW);
-  delay(1000);
+  delay(50);
   digitalWrite(laserPin, HIGH);
   delay(50);
 

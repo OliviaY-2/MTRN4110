@@ -2,21 +2,35 @@
 ///////////////////////////////////////////////
 // Motor V1.00
 ///////////////////////////////////////////////
+
 #define ENCODER1PIN_A 10
 #define ENCODER1PIN_B  8
 #define MOTOR1DIRECTION_PIN 4
 #define MOTOR1SPEED_PIN 5
 
-#define ENCODER2PIN_A 3
-#define ENCODER2PIN_B  9
-#define MOTOR2DIRECTION_PIN 7
-#define MOTOR2SPEED_PIN 6
+#define ENCODER2PIN_A 10
+#define ENCODER2PIN_B  8
+#define MOTOR2DIRECTION_PIN 4
+#define MOTOR2SPEED_PIN 5
 
+int MOTOR1SPEED_PIN = 5; //speed control for motor 1 (left motor)
+int MOTOR1DIRECTION_PIN = 4; //direction control for motor 1
+int MOTOR2SPEED_PIN = 6; //speed control for motor 2 (right motor)
+int MOTOR2DIRECTION_PIN = 7; //direction control for motor 2
 int _Speed1 = 0; //speed for motor 1
 int _Speed2 = 0;
 
+
+const byte ENCODER1PIN_A = 10;//A pin
+const byte ENCODER1PIN_B = 8;//B pin
+byte ENCODER1PIN_ALast;
 int duration1;//the number of the pulses
+boolean Direction1;//the rotation direction
+const byte ENCODER2PIN_A = 3;//A pin
+const byte ENCODER2PIN_B = 9;//B pin
+byte ENCODER2PIN_ALast;
 int duration2;//the number of the pulses
+boolean Direction2;//the rotation direction
 
 void Encoder1Init();
 void Encoder2Init();
@@ -64,23 +78,11 @@ void wheelSpeed2()
 }
 
 int getDirectionPin(int motor) { // here to allow improved interations with the motor later
-  int directionPin;
-  if (motor == 1) {
-    directionPin = MOTOR1DIRECTION_PIN;
-  } else {
-    directionPin = MOTOR2DIRECTION_PIN;
-  }
-  return directionPin;
+  return motor;
 }
 
 int getSpeedPin(int motor) { // here to allow improved interations with the motor later
-  int speedPin;
-  if (motor == 1) {
-    speedPin = MOTOR1SPEED_PIN;
-  } else {
-    speedPin = MOTOR2SPEED_PIN; 
-  }
-  return speedPin;
+  return motor;
 }
 
 void setMotorForward(int motor) { digitalWrite(getDirectionPin(motor), HIGH); }

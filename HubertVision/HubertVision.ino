@@ -69,17 +69,17 @@ void pathFromString(String Instructions);
 void decisionTree();
 
 ///////////////////////////////////////////////
-// LED V1.01
+// LED V1.01 changed
 ///////////////////////////////////////////////
 
 // PIN numbers for each LED
 #define RED_LED 36
 #define GREEN_LED 37
 
-// 0 = both lights off
-// 1 = ledState :  Green light on,  Red light off
-// 2 = ledState :  Green light off, Red light on  
-// 3 = ledState :  Green light on,  Red light on 
+// 0 = Green light off, Red light off
+// 1 = Green light on,  Red light off
+// 2 = Green light off, Red light on  
+// 3 = Green light on,  Red light on 
 int LED_State = 0; 
 
 void initLEDS();
@@ -88,10 +88,10 @@ void updateLED(int ledState);
 void setLED(int colourLED, int ledState);
 
 ///////////////////////////////////////////////
-// Ultrasonic V2.00
-///////////////////////////////////////////////
 
-#include <external_VL6180X.h>
+///////////////////////////////////////////////
+// Ultrasonic V2.01
+///////////////////////////////////////////////
 
 #define TRIG_PIN 30 
 #define ECHO_PIN 31
@@ -101,10 +101,17 @@ double ultrasonicRange();
 void testUltrasonic();
 
 ///////////////////////////////////////////////
-// Laser V2.02
+
+///////////////////////////////////////////////
+// Laser V2.04 changed
 ///////////////////////////////////////////////
 
 #include <external_VL6180X.h>
+#ifndef WIRE_H_INCLUDED
+#define WIRE_H_INCLUDED
+#include <Wire.h>
+#endif
+
 
 //use 33 on mega
 #define LASER1PIN 33
@@ -122,17 +129,20 @@ void testingLaser(VL6180X &laser, int laserNum);
 void testLasers();
 
 ///////////////////////////////////////////////
+
+///////////////////////////////////////////////
 // Motor V1.00
 ///////////////////////////////////////////////
+
 #define ENCODER1PIN_A 10
 #define ENCODER1PIN_B  8
 #define MOTOR1DIRECTION_PIN 4
 #define MOTOR1SPEED_PIN 5
 
-#define ENCODER2PIN_A 3
-#define ENCODER2PIN_B  9
-#define MOTOR2DIRECTION_PIN 7
-#define MOTOR2SPEED_PIN 6
+#define ENCODER2PIN_A 10
+#define ENCODER2PIN_B  8
+#define MOTOR2DIRECTION_PIN 4
+#define MOTOR2SPEED_PIN 5
 
 int _Speed1 = 0; //speed for motor 1
 int _Speed2 = 0;
@@ -152,30 +162,86 @@ void setMotorReverse(int motor);
 void setMotorSpeed(int motor, int _speed);
 
 ///////////////////////////////////////////////
-// Driving V2.0...
+
+///////////////////////////////////////////////
+// Robot V1.02 changed
 ///////////////////////////////////////////////
 
-#define CellSize 23
-#define STOPPING_DIST 5
+// currentPos 
+// Current position of the robot, (x,y, heading(deg)) +0 in X direction
+int currentPos[3] = {1,8,0}; 
 
-void forward1cell ();
-void forwardXcell (int X);
-void back1cell ();
-void right90deg ();
-void rightXdeg ();
-void right180deg ();
-void left90deg ();
-void leftXdeg (int X);
-void adjustInitialHeading ();
+// nextPos
+// Next position of the robot, (x,y, heading(deg))
+int nextPos[3] = {0,0,0}; 
 
+// Status of left or right wall
+// 0 = unknown, 1 = wallSeen, 2 = noWall 
+
+int leftWall  = 0; 
+int rightWall = 0; 
+
+// Status of the front wall 
+// 0 = unknown, 1 = wall directly in front, 2 = wall in second square in front,
+// 3 = wall in third square in front,       4 = wall in fourth square in front
+int frontWall = 0; 
+
+
+void calibrateRobot();
+void askNextHeading();
+void askNextX();
+void askNextY();
+void askNextPosition();
+void askRobotFrontWall();
+void askRobotLeftWall();
+void askRobotRightWall();
+void askUserLeftWall();
+void askUserRightWall();
+void askUserFrontWall();
+void displayPos(int pos[3]);
+int getDirection(float heading);
+int getHeading();
+int getXPos();
+int getYPos();
+void moveNextPosition();
+void setCurrentPos(int x, int y, int heading);
+void turnToHeading(double targetHeading);
+void turnAngle(double angle);
+void forwardNumCells(int numCells);
+
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+// IMU V2.01
+///////////////////////////////////////////////
+
+#include <MPU6050_tockn.h>
+
+#ifndef WIRE_H_INCLUDED
+#define WIRE_H_INCLUDED
+#include <Wire.h>
+#endif
+
+MPU6050 mpu6050(Wire);
+
+void initIMU();
+float readAngleZ();
 
 ///////////////////////////////////////////////
 
 void setup() {
   Serial1.begin(9600);
+  initLEDS();
   initUltrasonic();
-  initLaser(&laser1, LASER1PIN, LASER1ADDRESS);
-  initLaser(&laser2, LASER2PIN, LASER2ADDRESS);
+  initIMU();
+  calibrateRobot();
+  initLaser(laser1, LASER1PIN, LASER1ADDRESS);
+  initLaser(laser2, LASER2PIN, LASER2ADDRESS);
+  Encoder1Init();
+  Encoder2Init();
+  analogWrite(MOTOR1SPEED_PIN, 0); 
+  analogWrite(MOTOR2SPEED_PIN, 0);
+  updateLED(0);
 }
 
 void loop() 
@@ -189,6 +255,10 @@ void loop()
         {
 
           decodeInput(input);
+
+          //Use planned path to drive to the center
+          updateLED(1);
+          pathFromString(instructions);
           
           input = "";
           Serial1.write('o');
@@ -197,7 +267,5 @@ void loop()
           Serial1.write('\n');
         }
     }
-  //Use planned path to drive to the center
-  updateLED(1);
-  pathFromString(instructions);
+
 }
